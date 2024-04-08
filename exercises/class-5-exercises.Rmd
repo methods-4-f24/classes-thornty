@@ -6,11 +6,12 @@ date: "2024-04-01"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+install.packages("dagitty")
 ```
 
 ```{r}
 library(rethinking)
-library(daggity)
+library(dagitty)
 ```
 
 Welcome back to your favorite course of all time. This week we start getting into causal inference - arguably the most important part of all of your Methods courses. Why? Because we finally start practicing *doing science*, not just statistics.
@@ -23,6 +24,12 @@ The exercises for this week are versions of exercises from Chapter 5, modified t
 
 Do this by discussing the exercises in pairs. No need to code anything. :))
 
+5E1: 2 and 4
+
+5E2: Animal diversity is linearly related to latitude, but only after controlling for plant diversity.
+
+μi = α + βxi
+ 
 ### Medium
 
 Throughout this course, there has been a hard emphasis on clarifying and formalizing your assumptions about the world in your statistical models. Up until now we have been doing it in a form of priors for our parameters. Today we begin formalizing our *causal assumptions* about the *generative model* of the data, in the form of DAGs.
@@ -37,11 +44,20 @@ You are far from a good farmer. You only know how to code. In the morning, the t
 
 Invent your own example of a spurious correlation. An outcome variable should be correlated with both predictor variables. But when both predictors are entered in the same model, the correlation between the outcome and one of the predictors should mostly vanish (or at least be greatly reduced). 
 
-See if you can come up with a cogsci-inspired phenomenon. Anxiety? Bliss? Make a DAG and use the *daggity* package to illustrate it. 
+See if you can come up with a cogsci-inspired phenomenon. Anxiety? Bliss? Make a DAG and use the *dagitty* package to illustrate it. 
 
 ```{r}
 
-# ilustrate your dag
+# illustrate your dag
+dag <- dagitty( "dag {
+                        SM -> MH
+                        YI -> SM
+                        YI -> MH
+                      }")
+
+coordinates(dag) <- list( x=c(A=0,D=1,M=2) , y=c(A=0,D=1,M=0) )
+drawdag( dag )
+
 # What are the conditional independencies of your DAG?
 
 ```
