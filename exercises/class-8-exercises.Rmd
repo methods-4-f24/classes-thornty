@@ -22,17 +22,70 @@ Do all the easy exercises from Chapter 9: **9E1** through **9E6**.
 
 #### 9M1
 
-```{r}
+Re-estimate the terrain ruggedness model from the chapter, but now using a uniform prior and
+an exponential prior for the standard deviation, sigma. The uniform prior should be dunif(0,10)
+and the exponential should be dexp(1). Do the different priors have any detectible influence on the
+posterior distribution?
 
-# Your solution here
+```{r code from the book with modification}
+
+## R code 9.11
+library(rethinking)
+data(rugged)
+d <- rugged
+d$log_gdp <- log(d$rgdppc_2000)
+dd <- d[ complete.cases(d$rgdppc_2000) , ]
+dd$log_gdp_std <- dd$log_gdp / mean(dd$log_gdp)
+dd$rugged_std <- dd$rugged / max(dd$rugged)
+dd$cid <- ifelse( dd$cont_africa==1 , 1 , 2 )
+
+## R code 9.12
+m8.3 <- quap(
+    alist(
+        log_gdp_std ~ dnorm( mu , sigma ) ,
+        mu <- a[cid] + b[cid]*( rugged_std - 0.215 ) ,
+        a[cid] ~ dnorm( 1 , 0.1 ) ,
+        b[cid] ~ dnorm( 0 , 0.3 ) ,
+        sigma ~ dunif(0,10) # dexp( 1 )
+    ) , data=dd )
+
+precis( m8.3 )
 
 ```
 
+
 #### 9M2
+
+The Cauchy and exponential priors from the terrain ruggedness model are very weak. They
+can be made more informative by reducing their scale. Compare the dcauchy and dexp priors for
+progressively smaller values of the scaling parameter. As these priors become stronger, how does each
+influence the posterior distribution?
 
 ```{r}
 
+m8.3_cauchy <- quap(
+    alist(
+        log_gdp_std ~ dnorm( mu , sigma ) ,
+        mu <- a[cid] + b[cid]*( rugged_std - 0.215 ) ,
+        a[cid] ~ dnorm( 1 , 0.1 ) ,
+        b[cid] ~ dnorm( 0 , 0.3 ) ,
+        sigma ~ dcauchy( 0.1 )
+    ) , data=dd )
 # Your solution herre
+
+m8.3_exp <- quap(
+    alist(
+        log_gdp_std ~ dnorm( mu , sigma ) ,
+        mu <- a[cid] + b[cid]*( rugged_std - 0.215 ) ,
+        a[cid] ~ dnorm( 1 , 0.1 ) ,
+        b[cid] ~ dnorm( 0 , 0.3 ) ,
+        sigma ~ dexp( 0.001 )
+    ) , data=dd )
+# Your solution herre
+
+precis( m8.3_cauchy, depth = 2)
+
+precis( m8.3_exp, depth = 2)
 
 ```
 
@@ -40,11 +93,22 @@ Do all the easy exercises from Chapter 9: **9E1** through **9E6**.
 
 #### 9H1
 
+Run the model below and then inspect the posterior distribution and explain what it is accomplishing.
+
 ```{r}
 
-# Your solution here
+mp <- map2stan(alist(
+  a ~ dnorm(0,1),
+  b ~ dcauchy(0,1)
+  ),
+  data=list(y=1),
+  start=list(a=0,b=0),
+  iter=1e4, warmup=100 , WAIC=FALSE )
 
 ```
+
+Compare the samples for the parameters a and b. Can you explain the different trace plots, using
+what you know about the Cauchy distribution?
 
 #### 9H2
 
